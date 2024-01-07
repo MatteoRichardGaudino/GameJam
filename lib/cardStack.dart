@@ -1,3 +1,4 @@
+import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:game_jam/points.dart';
 import 'package:playing_cards/playing_cards.dart';
@@ -88,14 +89,24 @@ class _CardStackState extends State<CardStack> {
   }
 
   Widget _buildCardPlaceholder(){
+    int internalPadding = 30;
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.blueGrey, width: 5),
-      ),
       height: widget.cardHeight,
       width: widget.cardWidth,
+      child: Center(
+        child: DottedBorder(
+          borderType: BorderType.RRect,
+          radius: Radius.circular(20),
+          color: Color(0xff294644),
+          dashPattern: [10, 15],
+          strokeCap: StrokeCap.round,
+          strokeWidth: 4,
+          child: Container(
+            height: widget.cardHeight-internalPadding,
+            width: widget.cardWidth-internalPadding,
+          ),
+        ),
+      ),
     );
   }
 
@@ -118,7 +129,18 @@ class _CardStackState extends State<CardStack> {
     return Container(
       width: widget.cardWidth,
       height: widget.cardHeight,
-      child: PlayingCardView(card: card, showBack: widget.type == CardStackType.deck),
+      child: PlayingCardView(
+          card: card,
+          showBack: widget.type == CardStackType.deck,
+          style: PlayingCardViewStyle(
+            cardBackContentBuilder: (context){
+              return Image.asset(
+                  "assets/carta-retro.png",
+                  fit: BoxFit.fill,
+              );
+            },
+          )
+      ),
     );
   }
 
