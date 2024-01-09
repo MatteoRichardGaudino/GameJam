@@ -121,6 +121,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     edgesStks.addAll([
       [initialCards[0]],
+      // [],
       [initialCards[1]],
       [initialCards[2]],
       [initialCards[3]],
@@ -131,7 +132,7 @@ class _MyHomePageState extends State<MyHomePage> {
   // build three dots in a row
   Widget _buildPowerSlots(width){
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
 
       children: [
@@ -225,7 +226,7 @@ class _MyHomePageState extends State<MyHomePage> {
         CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: discardStk, type: CardStackType.discard),
         SizedBox(height: 20),
         Visibility(
-          visible: false,
+          visible: true,
           child: OutlinedButton(
             onPressed: (){
               _showDiscardPile();
@@ -235,7 +236,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         SizedBox(height: 20),
 
-        CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: allCards, type: CardStackType.deck),
+        CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: allCards, type: CardStackType.deck, discardStk: discardStk, fatherSetState: setState,),
         SizedBox(height: 40),
         OutlinedButton(
           onPressed: (){
@@ -261,8 +262,40 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  void _showDiscardPile(){
-    final stk = allCards;
+  List _dialogCardRow(List<PlayingCard> row){
+
+    double screenH = MediaQuery.of(context).size.height;
+    double cardHeight = screenH/4;
+    double cardWidth = cardHeight * 2/3;
+
+    double space = _dialogWidth() - cardWidth;
+    double spaceXcard = space / (row.length-1);
+    double step = spaceXcard;
+
+    if(spaceXcard >= cardWidth*7/9){
+      step = cardWidth * 7/9;
+    }
+
+    double offset = 0;
+    return row.map((e) {
+        final w = Transform.translate(
+          offset: Offset(offset, 0),
+          child: Container(
+            width: cardWidth,
+            height: cardHeight,
+            child: PlayingCardView(card: e),
+          ),
+        );
+        // increment offset
+        offset += step;
+        return w;
+    }).toList();
+
+  }
+
+  Widget _dialogCardColumn(){
+
+    final stk = discardStk;
 
     int start = 0;
     int end = min(stk.length, 10);
@@ -279,12 +312,36 @@ class _MyHomePageState extends State<MyHomePage> {
     print("secondRowSize: ${secondRow.length}");
     print("thirdRowSize: ${thirdRow.length}");
 
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        Stack(
+          children: [
+            Container(),
+            ..._dialogCardRow(firstRow)
+          ],
+        ),
+        Stack(
+          children: [
+            Container(),
+            ..._dialogCardRow(secondRow)
+          ],
+        ),
+        Stack(
+          children: [
+            Container(),
+            ..._dialogCardRow(thirdRow)
+          ],
+        )
+      ],
+    );
+  }
 
-    final dialogWidth = MediaQuery.of(context).size.width * 2/3;
-    final dialogHeight = MediaQuery.of(context).size.height * 2/3;
+  double _dialogWidth() => MediaQuery.of(context).size.width * 2/3;
+  double _dialogHeight() => (3 * cardHeight) + (cardHeight/2);
 
-    double frstRowOffset = 0;
-    double firstRowSpace =  ((dialogWidth -80)/ firstRow.length);
+  void _showDiscardPile(){
+
 
     showDialog(
       context: context,
@@ -292,41 +349,9 @@ class _MyHomePageState extends State<MyHomePage> {
         return AlertDialog(
           title: Text("Discard pile"),
           content: Container(
-            width: dialogWidth,
-            height: dialogHeight,
-            child: Column(
-              children: [
-                Stack(
-                  children: [
-                    Container(),
-                    ...firstRow.map((e) =>
-                        Transform.translate(
-                          offset: Offset(frstRowOffset++ * (firstRowSpace), 0),
-                          child: Container(
-                            width: cardWidth,
-                            height: cardHeight,
-                            child: PlayingCardView(card: e),
-                          ),
-                        )
-                    ).toList()
-                  ],
-                ),
-                Row(
-                  children: [
-                    Container(
-                      color: Colors.red,
-                    )
-                  ],
-                ),
-                Row(
-                  children: [
-                    Container(
-                      color: Colors.red,
-                    )
-                  ],
-                )
-              ],
-            ),
+            width: _dialogWidth(),
+            height: _dialogHeight(),
+            child: _dialogCardColumn(),
           ),
           actions: [
             TextButton(
@@ -357,7 +382,7 @@ class _MyHomePageState extends State<MyHomePage> {
     //   cardHeight = cardWidth * 3/2;
     // } else {
       // print("second > screenHeight");
-      cardHeight = screenHeight/4;
+      cardHeight = screenHeight/3;
       cardWidth = cardHeight * 2/3;
     // }
 

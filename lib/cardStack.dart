@@ -12,13 +12,13 @@ enum CardStackType {
 }
 
 class CardStack extends StatefulWidget {
-  CardStack({super.key, required this.cardWidth, required this.cardHeight, required this.stk, required this.type});
+  CardStack({super.key, required this.cardWidth, required this.cardHeight, required this.stk, required this.type, this.discardStk, this.fatherSetState});
   double cardWidth;
   double cardHeight;
-  List<PlayingCard> stk = [];
+  List<PlayingCard> stk;
+  List<PlayingCard>? discardStk;
   CardStackType type;
-
-  _CardStackState? state;
+  void Function(void Function())? fatherSetState;
 
   PlayingCard top(){
     return stk[stk.length - 1];
@@ -34,6 +34,7 @@ class CardStack extends StatefulWidget {
 
 class _CardStackState extends State<CardStack> {
 
+  bool accepted = false;
 
   bool canAccept(CardStack other){
     if(widget.type == CardStackType.deck) return false; // deck can't accept anything
@@ -51,7 +52,7 @@ class _CardStackState extends State<CardStack> {
 
     else if(widget.type == CardStackType.edge){
       if(widget.stk.isEmpty){
-        return true; // empty edge can accept anything
+        return other.type != CardStackType.edge; // empty edge can accept anything but other edges
       } else {
         return descRule(widget.top(), other.top());
       }
@@ -72,10 +73,10 @@ class _CardStackState extends State<CardStack> {
 
       onAccept: (data){
         if(!canAccept(data.widget)) return;
+        data.accepted = true;
 
         setState(() {
           final card = data.widget.stk.removeLast();
-          widget.stk.add(card);
 
           if(widget.type == CardStackType.edge && widget.stk.isNotEmpty){
             gamePoints.inc();
@@ -83,6 +84,8 @@ class _CardStackState extends State<CardStack> {
           if(widget.type == CardStackType.demonHand){
             gamePoints.dec(1);
           }
+
+          widget.stk.add(card);
         });
       },
     );
@@ -110,28 +113,51 @@ class _CardStackState extends State<CardStack> {
     );
   }
 
+  bool cancelled = false;
   Widget _buildCardStack(){
     final first = widget.stk[widget.stk.length - 1];
     final second = (widget.stk.length == 1)? null : widget.stk[widget.stk.length - 2];
 
-    return Draggable(
+    if(widget.type == CardStackType.vertex){
+      return cardContainer(first);
+    } else {
+      return Draggable(
         data: this,
         childWhenDragging: (second == null)? _buildCardPlaceholder() : cardContainer(second),
         child: cardContainer(first),
-        feedback: cardContainer(first),
+        feedback: cardContainer(first, forceShow: true),
         onDragCompleted: (){
-          setState(() {});
+          if(widget.type == CardStackType.deck && !accepted){
+            widget.fatherSetState!((){
+              final card = widget.stk.removeLast();
+              widget.discardStk!.add(card);
+            });
+          }
+          accepted = false;
+          setState(() {
+
+          });
         },
-    );
+        onDraggableCanceled: (v, o){
+          if(widget.type == CardStackType.deck){
+            accepted = false;
+            widget.fatherSetState!((){
+              final card = widget.stk.removeLast();
+              widget.discardStk!.add(card);
+            });
+          }
+        },
+      );
+    }
   }
 
-  Widget cardContainer(PlayingCard card){
+  Widget cardContainer(PlayingCard card, {bool forceShow = false}){
     return Container(
       width: widget.cardWidth,
       height: widget.cardHeight,
       child: PlayingCardView(
           card: card,
-          showBack: widget.type == CardStackType.deck,
+          showBack: !forceShow && widget.type == CardStackType.deck,
           style: PlayingCardViewStyle(
             cardBackContentBuilder: (context){
               return Image.asset(

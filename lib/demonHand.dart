@@ -14,32 +14,45 @@ class DemonHand extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    // original 589x840
+    // aspect ratio 0.7 w/h
+
+    double imageHeight = cardHeight*2;
+    double imageWidth = imageHeight*0.7;
+
     return Stack(
       clipBehavior: Clip.none,
       children: [
+
+
+
         Positioned(
-          top: -0,
-            right: -25,
+            top: imageHeight/30,
+            left: imageWidth/10,
             child: Transform.rotate(
-                angle: 0.5,
+                angle: -0.3,
+                child: CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: stk2, type: CardStackType.demonHand))
+        ),
+
+        Positioned(
+            top: 0,
+            right: 0,
+            child: Transform.rotate(
+                angle: 0.4,
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   child: CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: stk1, type: CardStackType.demonHand),
                 ))
         ),
-
-        Positioned(
-            top: -0,
-            right: 140,
-            child: Transform.rotate(
-                angle: -0.4,
-                child: CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: stk2, type: CardStackType.demonHand))
-        ),
         IgnorePointer(
           ignoring: true,
-          child: Image.asset("assets/mano-demone.png",
-           width: width,
-            //height: MediaQuery.of(context).size.height * 3/4,
+          child: Transform.translate(
+            offset: Offset(-imageWidth/8, imageHeight/6),
+            child: Image.asset("assets/mano-demone.png",
+              width: imageWidth,
+              height: imageHeight,
+            ),
           ),
         )
       ],
