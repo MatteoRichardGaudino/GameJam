@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -5,6 +7,7 @@ import 'package:game_jam/cardStack.dart';
 import 'package:game_jam/demonHand.dart';
 import 'package:game_jam/points.dart';
 import 'package:game_jam/powerSlot.dart';
+import 'package:hovering/hovering.dart';
 import 'package:playing_cards/playing_cards.dart';
 
 void main() {
@@ -34,7 +37,7 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
 
   double cardWidth = 0;
   double cardHeight = 0;
@@ -121,12 +124,27 @@ class _MyHomePageState extends State<MyHomePage> {
 
     edgesStks.addAll([
       [initialCards[0]],
-      // [],
       [initialCards[1]],
       [initialCards[2]],
       [initialCards[3]],
       [initialCards[4]],
+      // [PlayingCard(Suit.clubs, CardValue.four)],
+      // [PlayingCard(Suit.clubs, CardValue.two)],
+      // [PlayingCard(Suit.clubs, CardValue.three)],
+      // [],
+      // [],
     ]);
+  }
+
+  late final AnimationController _hoverAnimationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _hoverAnimationController = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: 1),
+    ); // <-- Set your duration here.
   }
 
   // build three dots in a row
@@ -223,14 +241,20 @@ class _MyHomePageState extends State<MyHomePage> {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         Spacer(),
-        CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: discardStk, type: CardStackType.discard),
+        GestureDetector(
+          onTap: (){
+            if(discardStk.isEmpty) return;
+            _showDiscardPile();
+          },
+            child: CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: discardStk, type: CardStackType.discard, fatherSetState: setState,)),
         SizedBox(height: 20),
         Visibility(
           visible: true,
           child: OutlinedButton(
-            onPressed: (){
-              _showDiscardPile();
-            },
+            onPressed: gamePoints.can(2) && discardStk.isNotEmpty?
+                (){
+              _showDiscardPile(summon: true);
+            } : null,
             child: Text("Summon card (2pp)"),
           ),
         ),
@@ -262,7 +286,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  List _dialogCardRow(List<PlayingCard> row){
+  List _dialogCardRow(List<PlayingCard> row, {bool summon = false}){
 
     double screenH = MediaQuery.of(context).size.height;
     double cardHeight = screenH/4;
@@ -280,10 +304,20 @@ class _MyHomePageState extends State<MyHomePage> {
     return row.map((e) {
         final w = Transform.translate(
           offset: Offset(offset, 0),
-          child: Container(
-            width: cardWidth,
-            height: cardHeight,
-            child: PlayingCardView(card: e),
+          child: GestureDetector(
+            onTap: summon? (){
+              setState(() {
+                discardStk.remove(e);
+                discardStk.add(e);
+                gamePoints.dec(2);
+              });
+              Navigator.pop(context);
+            }: null,
+            child: SizedBox(
+              width: cardWidth,
+              height: cardHeight,
+              child: PlayingCardView(card: e),
+            ),
           ),
         );
         // increment offset
@@ -293,7 +327,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   }
 
-  Widget _dialogCardColumn(){
+  Widget _dialogCardColumn({bool summon = false}){
 
     final stk = discardStk;
 
@@ -318,19 +352,19 @@ class _MyHomePageState extends State<MyHomePage> {
         Stack(
           children: [
             Container(),
-            ..._dialogCardRow(firstRow)
+            ..._dialogCardRow(firstRow, summon: summon)
           ],
         ),
         Stack(
           children: [
             Container(),
-            ..._dialogCardRow(secondRow)
+            ..._dialogCardRow(secondRow, summon: summon)
           ],
         ),
         Stack(
           children: [
             Container(),
-            ..._dialogCardRow(thirdRow)
+            ..._dialogCardRow(thirdRow, summon: summon)
           ],
         )
       ],
@@ -340,27 +374,44 @@ class _MyHomePageState extends State<MyHomePage> {
   double _dialogWidth() => MediaQuery.of(context).size.width * 2/3;
   double _dialogHeight() => (3 * cardHeight) + (cardHeight/2);
 
-  void _showDiscardPile(){
+  void _showDiscardPile({bool summon = false}){
 
-
+    final String title = summon? "Summon a card" : "Discard pile";
     showDialog(
       context: context,
       builder: (context){
-        return AlertDialog(
-          title: Text("Discard pile"),
-          content: Container(
-            width: _dialogWidth(),
-            height: _dialogHeight(),
-            child: _dialogCardColumn(),
+        return Container(
+          color: Color(0x7f3c0d1f),
+          child: AlertDialog(
+            backgroundColor: Color(0xff294543),
+            surfaceTintColor: Color(0xff294543),
+            content: Container(
+              width: _dialogWidth(),
+              height: _dialogHeight(),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Row(
+                    children: [
+                      Spacer(),
+                      Text(title, style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 40),),
+
+                      Spacer(),
+                      IconButton(onPressed: (){
+                        Navigator.of(context).pop();
+                      }, icon: const Icon(Icons.close, color: Colors.white,)),
+                    ],
+                  ),
+                  Spacer(),
+                  _dialogCardColumn(summon: summon),
+                  Spacer(),
+                ],
+              ),
+            ),
           ),
-          actions: [
-            TextButton(
-              onPressed: (){
-                Navigator.of(context).pop();
-              },
-              child: Text("Close"),
-            )
-          ],
         );
       }
     );

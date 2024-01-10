@@ -51,14 +51,16 @@ class _CardStackState extends State<CardStack> {
     }
 
     else if(widget.type == CardStackType.edge){
+      if(other.top().value == CardValue.ace) return false; // edge can't accept aces
       if(widget.stk.isEmpty){
-        return other.type != CardStackType.edge; // empty edge can accept anything but other edges
+        return true; // empty edge can accept anything but other edges
       } else {
         return descRule(widget.top(), other.top());
       }
     }
 
     else if(widget.type == CardStackType.demonHand){
+      if(other.top().value == CardValue.ace) return false; // demon hand can't accept aces
       return gamePoints.can(1) && widget.stk.isEmpty;
     }
 
@@ -75,11 +77,19 @@ class _CardStackState extends State<CardStack> {
         if(!canAccept(data.widget)) return;
         data.accepted = true;
 
-        setState(() {
+        dynamic ss = setState;
+        if(widget.type == CardStackType.discard){
+          ss = widget.fatherSetState!;
+        }
+
+        ss(() {
           final card = data.widget.stk.removeLast();
 
           if(widget.type == CardStackType.edge && widget.stk.isNotEmpty){
-            gamePoints.inc();
+            if(!gamePoints.hasPair(card, widget.top())){
+              gamePoints.inc();
+              gamePoints.addPair(card, widget.top());
+            }
           }
           if(widget.type == CardStackType.demonHand){
             gamePoints.dec(1);
