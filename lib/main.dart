@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'dart:math';
 
@@ -236,53 +236,105 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
     );
   }
 
+  Widget _accentLetterText(f, s, t, baseColor, accentColor, color1, color2){
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+
+            colors: [color1, color2]
+        )
+      ),
+      child: Text.rich(
+          TextSpan(
+              text: f,
+              style: TextStyle(
+                  fontSize: 20,
+                  color: baseColor
+              ),
+              children: [
+                TextSpan(
+                    text: s,
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: accentColor
+                    )
+                ),
+                TextSpan(
+                    text: t
+                )
+              ]
+          )
+      ),
+    );
+  }
+
   Widget _buildThirdCol(width){
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        Spacer(),
-        GestureDetector(
-          onTap: (){
-            if(discardStk.isEmpty) return;
-            _showDiscardPile();
-          },
-            child: CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: discardStk, type: CardStackType.discard, fatherSetState: setState,)),
-        SizedBox(height: 20),
-        Visibility(
-          visible: true,
-          child: OutlinedButton(
-            onPressed: gamePoints.can(2) && discardStk.isNotEmpty?
-                (){
-              _showDiscardPile(summon: true);
-            } : null,
-            child: Text("Summon card (2pp)"),
+    return Padding(
+      padding: EdgeInsets.only(left: cardWidth/2),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Spacer(),
+          GestureDetector(
+            onTap: (){
+              if(discardStk.isEmpty) return;
+              _showDiscardPile();
+            },
+              child: CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: discardStk, type: CardStackType.discard, fatherSetState: setState,)),
+          SizedBox(height: 20),
+          Visibility(
+            visible: true,
+            child: SizedBox(
+              width: cardWidth,
+              child: TextButton(
+                onPressed: gamePoints.can(2) && discardStk.isNotEmpty?
+                    (){
+                  _showDiscardPile(summon: true);
+                } : null,
+                child: Text("Summon card (2pp)"),
+              ),
+            ),
           ),
-        ),
-        SizedBox(height: 20),
+          SizedBox(height: 20),
 
-        CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: allCards, type: CardStackType.deck, discardStk: discardStk, fatherSetState: setState,),
-        SizedBox(height: 40),
-        OutlinedButton(
-          onPressed: (){
-            if(!gamePoints.can(2)) return;
+          CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: allCards, type: CardStackType.deck, discardStk: discardStk, fatherSetState: setState,),
+          SizedBox(height: 40),
+          SizedBox(
+            width: cardWidth,
+            child: TextButton(
+              onPressed: (){
+                if(!gamePoints.can(2)) return;
 
-            final index = allCards.indexWhere((element) => element.value == CardValue.ace);
-            if(index == -1) return;
-            final card = allCards.removeAt(index);
-            print("Summoning an ace. index = $index, points = ${gamePoints.points}");
+                final index = allCards.indexWhere((element) => element.value == CardValue.ace);
+                if(index == -1) return;
+                final card = allCards.removeAt(index);
+                print("Summoning an ace. index = $index, points = ${gamePoints.points}");
 
-            for(int i = 0; i < verticesStks.length; i++){
-              if(verticesStks[i].isEmpty){
-                verticesStks[i].add(card);
-                gamePoints.dec(2);
-                break;
-              }
-            }
-          },
-          child: Text("Summon an Ace (2pp)"),
-        ),
-        Spacer()
-      ],
+                for(int i = 0; i < verticesStks.length; i++){
+                  if(verticesStks[i].isEmpty){
+                    verticesStks[i].add(card);
+                    gamePoints.dec(2);
+                    break;
+                  }
+                }
+              },
+              style: ButtonStyle(
+                overlayColor: MaterialStateProperty.resolveWith<Color>(
+                        (Set<MaterialState> states) {
+                      return Colors.transparent; // Defer to the widget's default.
+                    })),
+
+              child: HoverWidget(
+                  hoverChild: _accentLetterText("Summon an ", "A", "ce", Colors.white, Color(0xffb26371), Colors.transparent, Color(0xff915664)),
+                  onHover: ( event) {  },
+                  child: _accentLetterText("Summon an ", "A", "ce", Color(0xff796e5d), Color(0xff5a5245), Colors.transparent, Colors.transparent)
+              ),
+            ),
+          ),
+          Spacer()
+        ],
+      ),
     );
   }
 
@@ -423,41 +475,39 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    final first = screenWidth * 1/4;
-    final second = screenWidth * 2/4;
-    final third = screenWidth * 1/4;
+    cardHeight = screenHeight/3;
+    cardWidth = cardHeight * 2/3;
 
-    // if(second < screenHeight){
-    //   // print("second < screenHeight");
-    //   cardWidth = second/4;
-    //   cardHeight = cardWidth * 3/2;
-    // } else {
-      // print("second > screenHeight");
-      cardHeight = screenHeight/3;
-      cardWidth = cardHeight * 2/3;
-    // }
+    final w = screenWidth/cardWidth;
 
-    // print("cardWidth = $cardWidth");
-    // print("cardHeight = $cardHeight");
-    // print("AspectRatio = ${cardWidth/cardHeight}, (2:3 = ${2/3})");
+    final first = 2.5*cardWidth;
+    final second = 3*cardWidth;
+    final third = 2.5*cardWidth;
 
     return Scaffold(
       body: Container(
         color: Color(0xff171F22),
         child: Row(
           mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
+              // color: Colors.red,
               width: first,
                 height: screenHeight,
                 child: _buildFirstCol(first)
             ),
-            Container(width: second,
+            Container(
+                // color: Colors.blue,
+                width: second,
                 height: screenHeight,
                 alignment: Alignment.center,
                 child: _buildBoard()),
-            Container(width: third,
-                height: screenHeight,child: _buildThirdCol(third)),
+            Container(
+                // color: Colors.green,
+                width: third,
+                height: screenHeight,
+                child: _buildThirdCol(third)),
           ],
         ),
       )
