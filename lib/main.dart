@@ -2,10 +2,12 @@
 
 import 'dart:math';
 
+import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:game_jam/cardStack.dart';
 import 'package:game_jam/demonHand.dart';
+import 'package:game_jam/kTextButton.dart';
 import 'package:game_jam/points.dart';
 import 'package:game_jam/powerSlot.dart';
 import 'package:hovering/hovering.dart';
@@ -29,6 +31,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
+        fontFamily: "Sahitya",
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
@@ -105,6 +108,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
 
   final discardStk = <PlayingCard>[];
 
+  bool canSummon = true;
+
+  late AssetsAudioPlayer mainMusic;
+  bool mainMusicOff = true;
+
   _MyHomePageState(){
     allCards.shuffle();
 
@@ -143,15 +151,17 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
     ]);
   }
 
-  late final AnimationController _hoverAnimationController;
 
   @override
   void initState() {
     super.initState();
-    _hoverAnimationController = AnimationController(
-      vsync: this,
-      duration: Duration(seconds: 1),
-    ); // <-- Set your duration here.
+
+    mainMusic = AssetsAudioPlayer.newPlayer();
+    // mainMusic.open(
+    //   Audio("assets/music/divinazione_game_compressed.mp3"),
+    //   showNotification: false,
+    //   loopMode: LoopMode.playlist,
+    // );
   }
 
 
@@ -162,11 +172,50 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
       return GameState.won;
     }
     // if the deck is not empty return playing
-    if(allCards.isNotEmpty){
-      return GameState.playing;
+    if(allCards.isNotEmpty) return GameState.playing; // this includes the case where can summon an ace is true
+
+    // if demon hand has space and points can 1 return playing
+    if((demonHand1Stk.isEmpty || demonHand2Stk.isEmpty) && gamePoints.can(1)) return GameState.playing;
+
+    // if can move a card from discard to board return playing
+    if(discardStk.isNotEmpty){
+      final card = discardStk.last;
+      if(edgesStks.any((element) => element.isEmpty || descRule(element.last, card))) return GameState.playing;
+      if(verticesStks.any((element) => (element.isEmpty && card.value == CardValue.ace) || (element.isNotEmpty && crescentRule(element.last, card)))) return GameState.playing;
+    }
+    // same thing for demon hand
+    if(demonHand1Stk.isNotEmpty){
+      final card = demonHand1Stk.last;
+      if(edgesStks.any((element) => element.isEmpty || descRule(element.last, card))) return GameState.playing;
+      if(verticesStks.any((element) => (element.isEmpty && card.value == CardValue.ace) || (element.isNotEmpty && crescentRule(element.last, card)))) return GameState.playing;
+    }
+    if(demonHand2Stk.isNotEmpty){
+      final card = demonHand2Stk.last;
+      if(edgesStks.any((element) => element.isEmpty || descRule(element.last, card))) return GameState.playing;
+      if(verticesStks.any((element) => (element.isEmpty && card.value == CardValue.ace) || (element.isNotEmpty && crescentRule(element.last, card)))) return GameState.playing;
+    }
+    // if can move a card from the edges to the vertices return playing
+    for(int i = 0; i < edgesStks.length; i++){
+      final stk = edgesStks[i];
+      if(stk.isNotEmpty) {
+        final card = edgesStks[i].last;
+        if(verticesStks.any((element) => (element.isEmpty && card.value == CardValue.ace) || (element.isNotEmpty && crescentRule(element.last, card)))) return GameState.playing;
+      }
+    }
+    // if can move a card from the edges to the edges return playing
+    for(int i = 0; i < edgesStks.length; i++){
+      final stk = edgesStks[i];
+      if(stk.isNotEmpty) {
+        final card = edgesStks[i].last;
+        if(edgesStks.any((element) => element != stk && (element.isEmpty || descRule(element.last, card)))) return GameState.playing;
+      }
     }
 
-    return GameState.playing;
+    // if can summon a card return playing
+    if(canSummon && gamePoints.can(2) && discardStk.isNotEmpty) return GameState.playing;
+
+
+    return GameState.lost;
   }
 
   void _winCheckAndSetState(){
@@ -347,7 +396,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
             child: SizedBox(
               width: cardWidth,
               child: TextButton(
-                onPressed: gamePoints.can(2) && discardStk.isNotEmpty?
+                onPressed: canSummon && gamePoints.can(2) && discardStk.isNotEmpty?
                     (){
                   _showDiscardPile(summon: true);
                 } : null,
@@ -361,10 +410,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
           SizedBox(height: 40),
           SizedBox(
             width: cardWidth,
-            child: TextButton(
+            child: KTextButton("Summon an Ace",
+              accentIndex: 10,
               onPressed: (){
                 if(!gamePoints.can(2)) return;
-
                 final index = allCards.indexWhere((element) => element.value == CardValue.ace);
                 if(index == -1) return;
                 final card = allCards.removeAt(index);
@@ -372,23 +421,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
 
                 for(int i = 0; i < verticesStks.length; i++){
                   if(verticesStks[i].isEmpty){
-                    verticesStks[i].add(card);
-                    gamePoints.dec(2);
-                    break;
-                  }
+                  verticesStks[i].add(card);
+                  gamePoints.dec(2);
+                  break;
+                }
                 }
               },
-              style: ButtonStyle(
-                overlayColor: MaterialStateProperty.resolveWith<Color>(
-                        (Set<MaterialState> states) {
-                      return Colors.transparent; // Defer to the widget's default.
-                    })),
-
-              child: HoverWidget(
-                  hoverChild: _accentLetterText("Summon an ", "A", "ce", Colors.white, Color(0xffb26371), Colors.transparent, Color(0xff915664)),
-                  onHover: ( event) {  },
-                  child: _accentLetterText("Summon an ", "A", "ce", Color(0xff796e5d), Color(0xff5a5245), Colors.transparent, Colors.transparent)
-              ),
             ),
           ),
           Spacer()
@@ -421,6 +459,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
                 discardStk.remove(e);
                 discardStk.add(e);
                 gamePoints.dec(2);
+                canSummon = false;
               });
               Navigator.pop(context);
             }: null,
@@ -545,33 +584,41 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
     final second = 3*cardWidth;
     final third = 2.5*cardWidth;
 
-    return Scaffold(
-      body: Container(
-        color: Color(0xff171F22),
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              // color: Colors.red,
-              width: first,
-                height: screenHeight,
-                child: _buildFirstCol(first)
-            ),
-            Container(
-                // color: Colors.blue,
-                width: second,
-                height: screenHeight,
-                alignment: Alignment.center,
-                child: _buildBoard()),
-            Container(
-                // color: Colors.green,
-                width: third,
-                height: screenHeight,
-                child: _buildThirdCol(third)),
-          ],
-        ),
-      )
+    return GestureDetector(
+      onTap: (){
+        if(mainMusicOff){
+          //mainMusic.play();
+          mainMusicOff = false;
+        }
+      },
+      child: Scaffold(
+        body: Container(
+          color: Color(0xff171F22),
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                // color: Colors.red,
+                width: first,
+                  height: screenHeight,
+                  child: _buildFirstCol(first)
+              ),
+              Container(
+                  // color: Colors.blue,
+                  width: second,
+                  height: screenHeight,
+                  alignment: Alignment.center,
+                  child: _buildBoard()),
+              Container(
+                  // color: Colors.green,
+                  width: third,
+                  height: screenHeight,
+                  child: _buildThirdCol(third)),
+            ],
+          ),
+        )
+      ),
     );
   }
 }
