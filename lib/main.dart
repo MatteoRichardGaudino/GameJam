@@ -2,6 +2,7 @@
 
 import 'dart:math';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:game_jam/cardStack.dart';
 import 'package:game_jam/demonHand.dart';
@@ -12,6 +13,12 @@ import 'package:playing_cards/playing_cards.dart';
 
 void main() {
   runApp(const MyApp());
+}
+
+enum GameState{
+  playing,
+  won,
+  lost
 }
 
 class MyApp extends StatelessWidget {
@@ -147,6 +154,58 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
     ); // <-- Set your duration here.
   }
 
+
+
+  GameState _winCheck(){
+    // if all the vertex has a 10 return won
+    if(verticesStks.every((element) => element.isNotEmpty && element.last.value == CardValue.ten)){
+      return GameState.won;
+    }
+    // if the deck is not empty return playing
+    if(allCards.isNotEmpty){
+      return GameState.playing;
+    }
+
+    return GameState.playing;
+  }
+
+  void _winCheckAndSetState(){
+    final state = _winCheck();
+    if(state == GameState.playing) return;
+
+    if(state == GameState.won){
+      showCupertinoDialog(context: context, builder: (context){
+        return CupertinoAlertDialog(
+          title: Text("You won!"),
+          content: Text("You won the game!"),
+          actions: [
+            CupertinoDialogAction(
+              child: Text("Ok"),
+              onPressed: (){
+                Navigator.of(context).pop();
+              },
+            )
+          ],
+        );
+      });
+    } else {
+      showCupertinoDialog(context: context, builder: (context){
+        return CupertinoAlertDialog(
+          title: Text("You lost!"),
+          content: Text("You lost the game!"),
+          actions: [
+            CupertinoDialogAction(
+              child: Text("Ok"),
+              onPressed: (){
+                Navigator.of(context).pop();
+              },
+            )
+          ],
+        );
+      });
+    }
+  }
+
   // build three dots in a row
   Widget _buildPowerSlots(width){
     return Row(
@@ -165,9 +224,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
   Widget _buildDemonHand(){
     return Column(
       children: [
-        CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: demonHand1Stk, type: CardStackType.demonHand),
+        CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: demonHand1Stk, type: CardStackType.demonHand, onAccept: _winCheckAndSetState,),
         SizedBox(height: 20),
-        CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: demonHand2Stk, type: CardStackType.demonHand)
+        CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: demonHand2Stk, type: CardStackType.demonHand, onAccept: _winCheckAndSetState)
       ],
     );
   }
@@ -186,7 +245,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
         Positioned(
           bottom: -40,
             left: 0,
-            child: DemonHand(width, cardHeight: cardHeight, cardWidth: cardWidth, stk1: demonHand1Stk, stk2: demonHand2Stk,))
+            child: DemonHand(width, cardHeight: cardHeight, cardWidth: cardWidth, stk1: demonHand1Stk, stk2: demonHand2Stk, onAccept: _winCheckAndSetState,))
         //_buildDemonHand(),
       ],
     );
@@ -204,9 +263,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: verticesStks[0], type: CardStackType.vertex,),
-              CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: edgesStks[0], type: CardStackType.edge),
-              CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: verticesStks[1], type: CardStackType.vertex,),
+              CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: verticesStks[0], type: CardStackType.vertex, onAccept: _winCheckAndSetState),
+              CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: edgesStks[0], type: CardStackType.edge, onAccept: _winCheckAndSetState),
+              CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: verticesStks[1], type: CardStackType.vertex, onAccept: _winCheckAndSetState),
             ],
           ),
         ),
@@ -215,9 +274,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: edgesStks[1], type: CardStackType.edge),
-              CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: edgesStks[2], type: CardStackType.edge),
-              CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: edgesStks[3], type: CardStackType.edge),
+              CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: edgesStks[1], type: CardStackType.edge, onAccept: _winCheckAndSetState),
+              CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: edgesStks[2], type: CardStackType.edge, onAccept: _winCheckAndSetState),
+              CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: edgesStks[3], type: CardStackType.edge, onAccept: _winCheckAndSetState),
             ],
           ),
         ),
@@ -226,9 +285,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: verticesStks[2], type: CardStackType.vertex,),
-              CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: edgesStks[4], type: CardStackType.edge),
-              CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: verticesStks[3], type: CardStackType.vertex,),
+              CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: verticesStks[2], type: CardStackType.vertex,onAccept: _winCheckAndSetState),
+              CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: edgesStks[4], type: CardStackType.edge,onAccept: _winCheckAndSetState),
+              CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: verticesStks[3], type: CardStackType.vertex,onAccept: _winCheckAndSetState),
             ],
           ),
         ),
@@ -281,7 +340,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
               if(discardStk.isEmpty) return;
               _showDiscardPile();
             },
-              child: CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: discardStk, type: CardStackType.discard, fatherSetState: setState,)),
+              child: CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: discardStk, type: CardStackType.discard, fatherSetState: setState,onAccept: _winCheckAndSetState)),
           SizedBox(height: 20),
           Visibility(
             visible: true,
@@ -298,7 +357,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
           ),
           SizedBox(height: 20),
 
-          CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: allCards, type: CardStackType.deck, discardStk: discardStk, fatherSetState: setState,),
+          CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: allCards, type: CardStackType.deck, discardStk: discardStk, fatherSetState: setState,onAccept: _winCheckAndSetState),
           SizedBox(height: 40),
           SizedBox(
             width: cardWidth,
@@ -394,10 +453,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
     end = stk.length;
     final thirdRow = stk.sublist(start, end);
 
-    print("firstRowSize: ${firstRow.length}");
-    print("secondRowSize: ${secondRow.length}");
-    print("thirdRowSize: ${thirdRow.length}");
-
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
@@ -477,8 +532,14 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
 
     cardHeight = screenHeight/3;
     cardWidth = cardHeight * 2/3;
+    final totalWidth = cardWidth * 8;
 
-    final w = screenWidth/cardWidth;
+
+    if(screenWidth < totalWidth) {
+      cardWidth = screenWidth/8;
+      cardHeight = cardWidth * 3/2;
+    }
+
 
     final first = 2.5*cardWidth;
     final second = 3*cardWidth;

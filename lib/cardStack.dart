@@ -12,13 +12,15 @@ enum CardStackType {
 }
 
 class CardStack extends StatefulWidget {
-  CardStack({super.key, required this.cardWidth, required this.cardHeight, required this.stk, required this.type, this.discardStk, this.fatherSetState});
+  CardStack({super.key, required this.cardWidth, required this.cardHeight, required this.stk, required this.type, this.discardStk, this.fatherSetState, required this.onAccept});
   double cardWidth;
   double cardHeight;
   List<PlayingCard> stk;
   List<PlayingCard>? discardStk;
   CardStackType type;
   void Function(void Function())? fatherSetState;
+
+  dynamic Function() onAccept;
 
   PlayingCard top(){
     return stk[stk.length - 1];
@@ -96,6 +98,7 @@ class _CardStackState extends State<CardStack> {
           }
 
           widget.stk.add(card);
+          widget.onAccept();
         });
       },
     );
@@ -141,6 +144,7 @@ class _CardStackState extends State<CardStack> {
             widget.fatherSetState!((){
               final card = widget.stk.removeLast();
               widget.discardStk!.add(card);
+              widget.onAccept();
             });
           }
           accepted = false;
@@ -154,6 +158,7 @@ class _CardStackState extends State<CardStack> {
             widget.fatherSetState!((){
               final card = widget.stk.removeLast();
               widget.discardStk!.add(card);
+              widget.onAccept();
             });
           }
         },
