@@ -5,9 +5,10 @@ import 'dart:math';
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:game_jam/buttons/KRoundButton.dart';
 import 'package:game_jam/cardStack.dart';
 import 'package:game_jam/demonHand.dart';
-import 'package:game_jam/kTextButton.dart';
+import 'package:game_jam/buttons/kTextButton.dart';
 import 'package:game_jam/points.dart';
 import 'package:game_jam/powerSlot.dart';
 import 'package:hovering/hovering.dart';
@@ -383,6 +384,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _settingsButtonRow(),
           Spacer(),
           GestureDetector(
             onTap: (){
@@ -395,12 +397,13 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
             visible: true,
             child: SizedBox(
               width: cardWidth,
-              child: TextButton(
-                onPressed: canSummon && gamePoints.can(2) && discardStk.isNotEmpty?
-                    (){
+              child: KTextButton(
+                "Summon Card",
+                accentIndex: 7,
+                enabled: canSummon && gamePoints.can(2) && discardStk.isNotEmpty,
+                onPressed:(){
                   _showDiscardPile(summon: true);
-                } : null,
-                child: Text("Summon card (2pp)"),
+                },
               ),
             ),
           ),
@@ -411,6 +414,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
           SizedBox(
             width: cardWidth,
             child: KTextButton("Summon an Ace",
+              enabled: gamePoints.can(2) && _allCardsHasAce(),
               accentIndex: 10,
               onPressed: (){
                 if(!gamePoints.can(2)) return;
@@ -563,6 +567,25 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
     );
   }
 
+  Widget _settingsButtonRow(){
+    return Padding(
+      padding: const EdgeInsets.only(top: 30),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: cardWidth/1.5,
+          ),
+          KRoundButton("?", circular: true,),
+          SizedBox(
+            width: 5,
+          ),
+          KRoundButton("X", circular: true,),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -592,33 +615,41 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
         }
       },
       child: Scaffold(
-        body: Container(
-          color: Color(0xff171F22),
-          child: Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                // color: Colors.red,
-                width: first,
-                  height: screenHeight,
-                  child: _buildFirstCol(first)
+        body: Stack(
+          children: [
+            Container(
+              color: Color(0xff171F22),
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    // color: Colors.red,
+                    width: first,
+                      height: screenHeight,
+                      child: _buildFirstCol(first)
+                  ),
+                  Container(
+                      // color: Colors.blue,
+                      width: second,
+                      height: screenHeight,
+                      alignment: Alignment.center,
+                      child: _buildBoard()),
+                  Container(
+                      // color: Colors.green,
+                      width: third,
+                      height: screenHeight,
+                      child: _buildThirdCol(third)),
+                ],
               ),
-              Container(
-                  // color: Colors.blue,
-                  width: second,
-                  height: screenHeight,
-                  alignment: Alignment.center,
-                  child: _buildBoard()),
-              Container(
-                  // color: Colors.green,
-                  width: third,
-                  height: screenHeight,
-                  child: _buildThirdCol(third)),
-            ],
-          ),
+            ),
+          ],
         )
       ),
     );
+  }
+
+  bool _allCardsHasAce() {
+    return allCards.any((element) => element.value == CardValue.ace);
   }
 }

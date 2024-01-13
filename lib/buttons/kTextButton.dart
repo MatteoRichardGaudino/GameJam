@@ -37,7 +37,7 @@ class _KTextButtonState extends State<KTextButton> {
 
     return GestureDetector(
       onTap: (){
-        if(widget.onPressed != null){
+        if(widget.onPressed != null && widget.enabled){
           widget.onPressed!();
         }
       },
