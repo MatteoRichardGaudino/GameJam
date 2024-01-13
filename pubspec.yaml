@@ -39,6 +39,7 @@ dependencies:
   dotted_border: ^2.1.0
   hovering: ^1.0.4
   assets_audio_player: ^3.1.1
+  flutter_fadein: ^2.0.0
 
 dev_dependencies:
   flutter_test:
@@ -68,9 +69,13 @@ flutter:
     - assets/candela-animazione.gif
     - assets/carta-retro.png
     - assets/mano-demone.png
-    - assets/music/divinazione_game_compressed.mp3
     - assets/fonts/Sahitya-Regular.ttf
     - assets/fonts/Sahitya-Bold.ttf
+    - assets/Main_Title_start.png
+
+    - assets/music/divinazione_game_compressed.mp3
+    - assets/music/divinazione_maintitle_compressed.mp3
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

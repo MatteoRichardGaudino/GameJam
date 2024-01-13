@@ -5,6 +5,13 @@ import 'dart:math';
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_fadein/flutter_fadein.dart';
+import 'package:game_jam/AudioManager.dart';
+import 'package:game_jam/buttons/KIconButton.dart';
+import 'package:game_jam/dialogs/ExitConfirm.dart';
+import 'package:game_jam/dialogs/GameOverScreen.dart';
+import 'package:game_jam/dialogs/GameRulesDialog.dart';
+import 'package:game_jam/dialogs/WinScreen.dart';
 import 'package:game_jam/buttons/KRoundButton.dart';
 import 'package:game_jam/cardStack.dart';
 import 'package:game_jam/demonHand.dart';
@@ -15,6 +22,7 @@ import 'package:hovering/hovering.dart';
 import 'package:playing_cards/playing_cards.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -30,80 +38,106 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Kaalub',
       theme: ThemeData(
         fontFamily: "Sahitya",
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(),
+      home: const MainTitle(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+class MainTitle extends StatefulWidget {
+  const MainTitle({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<MainTitle> createState() => _MainTitleState();
 }
 
-class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
+class _MainTitleState extends State<MainTitle> {
+  
+  bool startGame = false;
+
+  Widget _buildTitle(){
+    return GestureDetector(
+        onTapDown: (a){
+          audioManager.playMenu();
+        },
+      child: Scaffold(
+        body: Container(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          color: Color(0xff171F22),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              Image.asset(
+                "assets/Main_Title_start.png",
+                height: MediaQuery.of(context).size.height * 2/3,
+              ),
+              Spacer(flex: 1,),
+              KRoundButton("Start Game", fontSize: 50,
+                onPressed: (){
+                  setState(() {
+                    startGame = true;
+                    audioManager.stopMenu().then((value) => audioManager.playGameMusic());
+                  });
+                },
+              ),
+              Spacer(flex: 2,),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMainGame(){
+    return FadeIn(
+      duration: Duration(milliseconds: 500),
+      child: MainGame(() {
+        setState(() {
+          startGame = false;
+          audioManager.stopGameMusic().then((value) => audioManager.playMenu());
+        });
+      }),
+    );
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height,
+        color: Color(0xff171F22),
+        child: startGame? _buildMainGame() : _buildTitle(),
+      );
+  }
+}
+
+
+class MainGame extends StatefulWidget {
+  const MainGame(this.onBack, {super.key});
+
+  final dynamic Function()? onBack;
+
+  @override
+  State<MainGame> createState() => _MainGameState();
+}
+
+class _MainGameState extends State<MainGame> with TickerProviderStateMixin{
 
   double cardWidth = 0;
   double cardHeight = 0;
 
-  final allCards = <PlayingCard>[
-    PlayingCard(Suit.spades, CardValue.ace),
-    PlayingCard(Suit.spades, CardValue.two),
-    PlayingCard(Suit.spades, CardValue.three),
-    PlayingCard(Suit.spades, CardValue.four),
-    PlayingCard(Suit.spades, CardValue.five),
-    PlayingCard(Suit.spades, CardValue.six),
-    PlayingCard(Suit.spades, CardValue.seven),
-    PlayingCard(Suit.spades, CardValue.eight),
-    PlayingCard(Suit.spades, CardValue.nine),
-    PlayingCard(Suit.spades, CardValue.ten),
-
-    PlayingCard(Suit.hearts, CardValue.ace),
-    PlayingCard(Suit.hearts, CardValue.two),
-    PlayingCard(Suit.hearts, CardValue.three),
-    PlayingCard(Suit.hearts, CardValue.four),
-    PlayingCard(Suit.hearts, CardValue.five),
-    PlayingCard(Suit.hearts, CardValue.six),
-    PlayingCard(Suit.hearts, CardValue.seven),
-    PlayingCard(Suit.hearts, CardValue.eight),
-    PlayingCard(Suit.hearts, CardValue.nine),
-    PlayingCard(Suit.hearts, CardValue.ten),
-
-    PlayingCard(Suit.clubs, CardValue.ace),
-    PlayingCard(Suit.clubs, CardValue.two),
-    PlayingCard(Suit.clubs, CardValue.three),
-    PlayingCard(Suit.clubs, CardValue.four),
-    PlayingCard(Suit.clubs, CardValue.five),
-    PlayingCard(Suit.clubs, CardValue.six),
-    PlayingCard(Suit.clubs, CardValue.seven),
-    PlayingCard(Suit.clubs, CardValue.eight),
-    PlayingCard(Suit.clubs, CardValue.nine),
-    PlayingCard(Suit.clubs, CardValue.ten),
-
-    PlayingCard(Suit.diamonds, CardValue.ace),
-    PlayingCard(Suit.diamonds, CardValue.two),
-    PlayingCard(Suit.diamonds, CardValue.three),
-    PlayingCard(Suit.diamonds, CardValue.four),
-    PlayingCard(Suit.diamonds, CardValue.five),
-    PlayingCard(Suit.diamonds, CardValue.six),
-    PlayingCard(Suit.diamonds, CardValue.seven),
-    PlayingCard(Suit.diamonds, CardValue.eight),
-    PlayingCard(Suit.diamonds, CardValue.nine),
-    PlayingCard(Suit.diamonds, CardValue.ten),
-  ];
+  final allCards = <PlayingCard>[];
   final initialCards = <PlayingCard>[];
 
   final edgesStks = <List<PlayingCard>>[];
-  final verticesStks = <List<PlayingCard>>[
-    [],[],[],[]
-  ];
+  final verticesStks = <List<PlayingCard>>[];
   final demonHand1Stk = <PlayingCard>[];
   final demonHand2Stk = <PlayingCard>[];
 
@@ -111,10 +145,69 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
 
   bool canSummon = true;
 
-  late AssetsAudioPlayer mainMusic;
   bool mainMusicOff = true;
 
-  _MyHomePageState(){
+  void _reset(){
+    allCards.clear();
+    initialCards.clear();
+    edgesStks.clear();
+    verticesStks.clear();
+    demonHand1Stk.clear();
+    demonHand2Stk.clear();
+    discardStk.clear();
+    canSummon = true;
+    gamePoints.reset();
+
+    allCards.addAll([PlayingCard(Suit.spades, CardValue.ace),
+      PlayingCard(Suit.spades, CardValue.two),
+      PlayingCard(Suit.spades, CardValue.three),
+      PlayingCard(Suit.spades, CardValue.four),
+      PlayingCard(Suit.spades, CardValue.five),
+      PlayingCard(Suit.spades, CardValue.six),
+      PlayingCard(Suit.spades, CardValue.seven),
+      PlayingCard(Suit.spades, CardValue.eight),
+      PlayingCard(Suit.spades, CardValue.nine),
+      PlayingCard(Suit.spades, CardValue.ten),
+
+      PlayingCard(Suit.hearts, CardValue.ace),
+      PlayingCard(Suit.hearts, CardValue.two),
+      PlayingCard(Suit.hearts, CardValue.three),
+      PlayingCard(Suit.hearts, CardValue.four),
+      PlayingCard(Suit.hearts, CardValue.five),
+      PlayingCard(Suit.hearts, CardValue.six),
+      PlayingCard(Suit.hearts, CardValue.seven),
+      PlayingCard(Suit.hearts, CardValue.eight),
+      PlayingCard(Suit.hearts, CardValue.nine),
+      PlayingCard(Suit.hearts, CardValue.ten),
+
+      PlayingCard(Suit.clubs, CardValue.ace),
+      PlayingCard(Suit.clubs, CardValue.two),
+      PlayingCard(Suit.clubs, CardValue.three),
+      PlayingCard(Suit.clubs, CardValue.four),
+      PlayingCard(Suit.clubs, CardValue.five),
+      PlayingCard(Suit.clubs, CardValue.six),
+      PlayingCard(Suit.clubs, CardValue.seven),
+      PlayingCard(Suit.clubs, CardValue.eight),
+      PlayingCard(Suit.clubs, CardValue.nine),
+      PlayingCard(Suit.clubs, CardValue.ten),
+
+      PlayingCard(Suit.diamonds, CardValue.ace),
+      PlayingCard(Suit.diamonds, CardValue.two),
+      PlayingCard(Suit.diamonds, CardValue.three),
+      PlayingCard(Suit.diamonds, CardValue.four),
+      PlayingCard(Suit.diamonds, CardValue.five),
+      PlayingCard(Suit.diamonds, CardValue.six),
+      PlayingCard(Suit.diamonds, CardValue.seven),
+      PlayingCard(Suit.diamonds, CardValue.eight),
+      PlayingCard(Suit.diamonds, CardValue.nine),
+      PlayingCard(Suit.diamonds, CardValue.ten),]);
+    verticesStks.addAll([
+      [],
+      [],
+      [],
+      [],
+    ]);
+
     allCards.shuffle();
 
     // if one of the first 4 cards is an ace replace it with the first non-ace card
@@ -152,17 +245,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
     ]);
   }
 
-
   @override
   void initState() {
     super.initState();
 
-    mainMusic = AssetsAudioPlayer.newPlayer();
-    // mainMusic.open(
-    //   Audio("assets/music/divinazione_game_compressed.mp3"),
-    //   showNotification: false,
-    //   loopMode: LoopMode.playlist,
-    // );
+
+    _reset();
   }
 
 
@@ -224,36 +312,43 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
     if(state == GameState.playing) return;
 
     if(state == GameState.won){
-      showCupertinoDialog(context: context, builder: (context){
-        return CupertinoAlertDialog(
-          title: Text("You won!"),
-          content: Text("You won the game!"),
-          actions: [
-            CupertinoDialogAction(
-              child: Text("Ok"),
-              onPressed: (){
-                Navigator.of(context).pop();
-              },
-            )
-          ],
-        );
-      });
+      _showWinDialog();
     } else {
-      showCupertinoDialog(context: context, builder: (context){
-        return CupertinoAlertDialog(
-          title: Text("You lost!"),
-          content: Text("You lost the game!"),
-          actions: [
-            CupertinoDialogAction(
-              child: Text("Ok"),
-              onPressed: (){
-                Navigator.of(context).pop();
-              },
-            )
-          ],
-        );
-      });
+      _showGameOverDialog();
     }
+  }
+
+  void _showWinDialog(){
+    showDialog(context: context, builder: (context){
+      return WinScreen((){
+        Navigator.pop(context);
+        widget.onBack?.call();
+      });
+    });
+  }
+
+  void _showExitConfirmDialog(){
+    showDialog(context: context, builder: (context){
+      return ExitConfirmDialog((){
+        Navigator.pop(context);
+        widget.onBack?.call();
+      });
+    });
+  }
+
+  void _showGameOverDialog(){
+    showDialog(context: context, builder: (context){
+      return GameOverDialog(() => {
+        Navigator.pop(context),
+        widget.onBack?.call()
+      });
+    });
+  }
+
+  void _showGameRules(){
+    showDialog(context: context, builder: (context){
+      return GameRulesDialog();
+    });
   }
 
   // build three dots in a row
@@ -270,16 +365,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
     );
   }
 
-  // build two container in a row
-  Widget _buildDemonHand(){
-    return Column(
-      children: [
-        CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: demonHand1Stk, type: CardStackType.demonHand, onAccept: _winCheckAndSetState,),
-        SizedBox(height: 20),
-        CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: demonHand2Stk, type: CardStackType.demonHand, onAccept: _winCheckAndSetState)
-      ],
-    );
-  }
 
   Widget _buildFirstCol(width){
     return Stack(
@@ -455,28 +540,49 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
 
     double offset = 0;
     return row.map((e) {
-        final w = Transform.translate(
-          offset: Offset(offset, 0),
-          child: GestureDetector(
-            onTap: summon? (){
-              setState(() {
-                discardStk.remove(e);
-                discardStk.add(e);
-                gamePoints.dec(2);
-                canSummon = false;
-              });
-              Navigator.pop(context);
-            }: null,
-            child: SizedBox(
-              width: cardWidth,
-              height: cardHeight,
-              child: PlayingCardView(card: e),
-            ),
+        final w = GestureDetector(
+          onTap: summon? (){
+            setState(() {
+              discardStk.remove(e);
+              discardStk.add(e);
+              gamePoints.dec(2);
+              canSummon = false;
+            });
+            Navigator.pop(context);
+          }: null,
+          child: SizedBox(
+            width: cardWidth,
+            height: cardHeight,
+            child: PlayingCardView(card: e),
           ),
+        );
+
+        final hoverWidget = HoverWidget(
+            onHover: (p){},
+            hoverChild: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  w,
+                  SizedBox(height: 20),
+                ]
+            ),
+            child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(height: 10),
+                  w,
+                  SizedBox(height: 10),
+                ]
+            ));
+
+
+        final transformed = Transform.translate(
+          offset: Offset(offset, 0),
+          child: hoverWidget,
         );
         // increment offset
         offset += step;
-        return w;
+        return transformed;
     }).toList();
 
   }
@@ -522,11 +628,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
   }
 
   double _dialogWidth() => MediaQuery.of(context).size.width * 2/3;
-  double _dialogHeight() => (3 * cardHeight) + (cardHeight/2);
+  double _dialogHeight() => (3 * cardHeight) + (cardHeight/2) + 60;
 
   void _showDiscardPile({bool summon = false}){
 
-    final String title = summon? "Summon a card" : "Discard pile";
+    final String title = summon? "Summon a card" : "Your Discard pile";
     showDialog(
       context: context,
       builder: (context){
@@ -545,14 +651,14 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
                     children: [
                       Spacer(),
                       Text(title, style: TextStyle(
-                          color: Colors.white,
+                          color: Color(0xffF9EFC2),
                           fontWeight: FontWeight.bold,
                           fontSize: 40),),
 
                       Spacer(),
-                      IconButton(onPressed: (){
+                      KRoundButton("X", circular: true, onPressed: (){
                         Navigator.of(context).pop();
-                      }, icon: const Icon(Icons.close, color: Colors.white,)),
+                      },),
                     ],
                   ),
                   Spacer(),
@@ -576,11 +682,24 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
           SizedBox(
             width: cardWidth/1.5,
           ),
-          KRoundButton("?", circular: true,),
+          KRoundButton("?", circular: true, onPressed: () {
+            _showGameRules();
+          },),
           SizedBox(
             width: 5,
           ),
-          KRoundButton("X", circular: true,),
+          KIconButton(audioManager.audioEnabled? Icons.volume_up : Icons.volume_off, circular: true, fontSize: 38,
+            onPressed: () {
+            setState(() {
+              audioManager.toggleAudio();
+            });
+          },),
+          SizedBox(
+            width: 5,
+          ),
+          KRoundButton("X", circular: true, onPressed: (){
+            _showExitConfirmDialog();
+          },),
         ],
       ),
     );

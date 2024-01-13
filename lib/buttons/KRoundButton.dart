@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
 class KRoundButton extends StatelessWidget {
-  KRoundButton(this.text, {super.key, this.onPressed, this.circular = false});
+  KRoundButton(this.text, {super.key, this.onPressed, this.circular = false, this.fontSize = 30});
 
   final String text;
   final dynamic Function()? onPressed;
   final bool circular;
+  final double fontSize;
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +51,7 @@ class KRoundButton extends StatelessWidget {
         },
         child: Container(
             padding: EdgeInsets.all(5),
-            child: Text(text, style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)))
+            child: Text(text, style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold)))
     );
   }
 }

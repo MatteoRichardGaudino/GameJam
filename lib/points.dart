@@ -35,6 +35,12 @@ class Points{
     points -= x;
     onChange();
   }
+
+  void reset(){
+    points = 0;
+    _pairs.clear();
+    onChange = (){};
+  }
 }
 
 Points gamePoints = Points();
