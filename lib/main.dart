@@ -2,7 +2,6 @@
 
 import 'dart:math';
 
-import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_fadein/flutter_fadein.dart';
@@ -49,6 +48,12 @@ class MyApp extends StatelessWidget {
   }
 }
 
+enum Screens{
+  intro,
+  title,
+  game
+}
+
 class MainTitle extends StatefulWidget {
   const MainTitle({super.key});
 
@@ -57,19 +62,17 @@ class MainTitle extends StatefulWidget {
 }
 
 class _MainTitleState extends State<MainTitle> {
-  
-  bool startGame = false;
+
+  Screens currentScreen = Screens.intro;
 
   Widget _buildTitle(){
-    return GestureDetector(
-        onTapDown: (a){
-          audioManager.playMenu();
-        },
-      child: Scaffold(
-        body: Container(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          color: Color(0xff171F22),
+    return Scaffold(
+      backgroundColor: Color(0xff171F22),
+      body: Container(
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height,
+        color: Color(0xff171F22),
+        child: FadeIn(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,
@@ -82,8 +85,9 @@ class _MainTitleState extends State<MainTitle> {
               KRoundButton("Start Game", fontSize: 50,
                 onPressed: (){
                   setState(() {
-                    startGame = true;
+                    currentScreen = Screens.game;
                     audioManager.stopMenu().then((value) => audioManager.playGameMusic());
+                    audioManager.playOptionsSelection();
                   });
                 },
               ),
@@ -100,10 +104,77 @@ class _MainTitleState extends State<MainTitle> {
       duration: Duration(milliseconds: 500),
       child: MainGame(() {
         setState(() {
-          startGame = false;
+          currentScreen = Screens.title;
+          audioManager.playExitGame();
           audioManager.stopGameMusic().then((value) => audioManager.playMenu());
         });
       }),
+    );
+  }
+
+  Widget _buildIntro(){
+    return Scaffold(
+      backgroundColor: Color(0xff171F22),
+      body: Container(
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height,
+        color: Color(0xff191f22),
+        child: GestureDetector(
+          onTap: (){
+            setState(() {
+              currentScreen = Screens.title;
+              audioManager.playMenu();
+            });
+          },
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: FadeIn(
+                duration: Duration(seconds: 5),
+                child: Text.rich(
+                  TextSpan(
+                    style: TextStyle(
+                      fontSize: 40,
+                      color: Color(0xff8bb48d),
+                      fontWeight: FontWeight.bold
+                    ),
+                    children: [
+                      TextSpan(text: "\"Oh "),
+                      TextSpan(
+                        text: "Kaalub",
+                        style: TextStyle(color: Color(0xffcc867d),)
+                      ),
+                      TextSpan(text: "! Oracle of Obsessions and Mistress of the Unknown!\n" +
+                          "For years I've tried relentlessly to build a "),
+                      TextSpan(
+                          text: "connection ",
+                          style: TextStyle(color: Color(0xffcc867d),)
+                      ),
+                      TextSpan(text: "between our words, and ask you to concede me your demonic power!\n" +
+                          "But now, with my new summoning ritual I will finally be able to connect with you and "),
+                      TextSpan(
+                          text: "see the future ",
+                          style: TextStyle(color: Color(0xffcc867d),)
+                      ),
+                      TextSpan(text: "!\""),
+
+                      TextSpan(
+                        text: "\n\n\nClick on the screen to continue",
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Color(0xffe0ba8b),
+                          fontWeight: FontWeight.normal
+                        )
+                      )
+                    ],
+                ),
+                textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          ),
+        ),
+      )
     );
   }
   
@@ -113,7 +184,11 @@ class _MainTitleState extends State<MainTitle> {
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
         color: Color(0xff171F22),
-        child: startGame? _buildMainGame() : _buildTitle(),
+        child: switch(currentScreen){
+          Screens.title => _buildTitle(),
+          Screens.game => _buildMainGame(),
+          Screens.intro => _buildIntro(),
+        },
       );
   }
 }
@@ -320,6 +395,7 @@ class _MainGameState extends State<MainGame> with TickerProviderStateMixin{
 
   void _showWinDialog(){
     showDialog(context: context, builder: (context){
+      audioManager.playSuonoVittoriaCompleto();
       return WinScreen((){
         Navigator.pop(context);
         widget.onBack?.call();
@@ -332,12 +408,14 @@ class _MainGameState extends State<MainGame> with TickerProviderStateMixin{
       return ExitConfirmDialog((){
         Navigator.pop(context);
         widget.onBack?.call();
+        audioManager.playOptionsSelection();
       });
     });
   }
 
   void _showGameOverDialog(){
     showDialog(context: context, builder: (context){
+      audioManager.playGameOver();
       return GameOverDialog(() => {
         Navigator.pop(context),
         widget.onBack?.call()
@@ -347,6 +425,7 @@ class _MainGameState extends State<MainGame> with TickerProviderStateMixin{
 
   void _showGameRules(){
     showDialog(context: context, builder: (context){
+      audioManager.playRules();
       return GameRulesDialog();
     });
   }
@@ -354,13 +433,14 @@ class _MainGameState extends State<MainGame> with TickerProviderStateMixin{
   // build three dots in a row
   Widget _buildPowerSlots(width){
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
 
       children: [
         PowerSlot(gamePoints.can(1), width: width/3,),
-        PowerSlot(gamePoints.can(2), width: width/3,),
-        PowerSlot(gamePoints.can(3), width: width/3,),
+        PowerSlot(gamePoints.can(2), width: width/3, offset: -width/3 * 2/4,),
+        PowerSlot(gamePoints.can(3), width: width/3, offset: (-width/3 * 4/4)),
       ],
     );
   }
@@ -470,32 +550,29 @@ class _MainGameState extends State<MainGame> with TickerProviderStateMixin{
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _settingsButtonRow(),
-          Spacer(),
+          Spacer(flex: 1,),
           GestureDetector(
             onTap: (){
               if(discardStk.isEmpty) return;
               _showDiscardPile();
             },
               child: CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: discardStk, type: CardStackType.discard, fatherSetState: setState,onAccept: _winCheckAndSetState)),
-          SizedBox(height: 20),
-          Visibility(
-            visible: true,
-            child: SizedBox(
-              width: cardWidth,
-              child: KTextButton(
-                "Summon Card",
-                accentIndex: 7,
-                enabled: canSummon && gamePoints.can(2) && discardStk.isNotEmpty,
-                onPressed:(){
-                  _showDiscardPile(summon: true);
-                },
-              ),
+          SizedBox(height: 5),
+          SizedBox(
+            width: cardWidth,
+            child: KTextButton(
+              "Summon Card",
+              accentIndex: 7,
+              enabled: canSummon && gamePoints.can(2) && discardStk.isNotEmpty,
+              onPressed:(){
+                _showDiscardPile(summon: true);
+              },
             ),
           ),
           SizedBox(height: 20),
 
           CardStack(cardWidth: cardWidth, cardHeight: cardHeight, stk: allCards, type: CardStackType.deck, discardStk: discardStk, fatherSetState: setState,onAccept: _winCheckAndSetState),
-          SizedBox(height: 40),
+          SizedBox(height: 5),
           SizedBox(
             width: cardWidth,
             child: KTextButton("Summon an Ace",
@@ -512,13 +589,14 @@ class _MainGameState extends State<MainGame> with TickerProviderStateMixin{
                   if(verticesStks[i].isEmpty){
                   verticesStks[i].add(card);
                   gamePoints.dec(2);
+                  audioManager.playSuonoEvocaAsso();
                   break;
                 }
                 }
               },
             ),
           ),
-          Spacer()
+          Spacer(flex: 2,)
         ],
       ),
     );
@@ -548,6 +626,7 @@ class _MainGameState extends State<MainGame> with TickerProviderStateMixin{
               gamePoints.dec(2);
               canSummon = false;
             });
+            audioManager.playSuonoEvocaCarta();
             Navigator.pop(context);
           }: null,
           child: SizedBox(
@@ -631,6 +710,7 @@ class _MainGameState extends State<MainGame> with TickerProviderStateMixin{
   double _dialogHeight() => (3 * cardHeight) + (cardHeight/2) + 60;
 
   void _showDiscardPile({bool summon = false}){
+    audioManager.playSuonoAccediPilaScarti();
 
     final String title = summon? "Summon a card" : "Your Discard pile";
     showDialog(
@@ -675,12 +755,12 @@ class _MainGameState extends State<MainGame> with TickerProviderStateMixin{
 
   Widget _settingsButtonRow(){
     return Padding(
-      padding: const EdgeInsets.only(top: 30),
+      padding: const EdgeInsets.only(top: 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           SizedBox(
-            width: cardWidth/1.5,
+            width: cardWidth*0.5,
           ),
           KRoundButton("?", circular: true, onPressed: () {
             _showGameRules();

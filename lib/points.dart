@@ -1,3 +1,4 @@
+import 'package:game_jam/AudioManager.dart';
 import 'package:playing_cards/playing_cards.dart';
 
 class Points{
@@ -22,6 +23,7 @@ class Points{
 
   void inc(){
     if(points == 3) return;
+    audioManager.playSuonoCandeleCheSiAccendono();
     points++;
     onChange();
   }
@@ -37,7 +39,7 @@ class Points{
   }
 
   void reset(){
-    points = 0;
+    points = 0; // TODO
     _pairs.clear();
     onChange = (){};
   }

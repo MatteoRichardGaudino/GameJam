@@ -1,5 +1,6 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:game_jam/AudioManager.dart';
 import 'package:game_jam/points.dart';
 import 'package:playing_cards/playing_cards.dart';
 
@@ -99,9 +100,18 @@ class _CardStackState extends State<CardStack> {
 
           widget.stk.add(card);
           widget.onAccept();
+          playAudioOnAccept();
         });
       },
     );
+  }
+
+  void playAudioOnAccept() async {
+    if(widget.type == CardStackType.demonHand){
+      audioManager.playSuonoMettereCartaNellaManoDelDemone();
+    } else {
+      audioManager.playSuonoMettiCartaInUnPostoQualsiasi();
+    }
   }
 
   Widget _buildCardPlaceholder(){
@@ -145,12 +155,18 @@ class _CardStackState extends State<CardStack> {
               final card = widget.stk.removeLast();
               widget.discardStk!.add(card);
               widget.onAccept();
+              playAudioOnAccept();
             });
           }
           accepted = false;
           setState(() {
 
           });
+        },
+        onDragStarted: (){
+          if(widget.type == CardStackType.deck){
+            audioManager.playSuonoPescaDalMazzoDiPesca();
+          }
         },
         onDraggableCanceled: (v, o){
           if(widget.type == CardStackType.deck){
@@ -159,6 +175,7 @@ class _CardStackState extends State<CardStack> {
               final card = widget.stk.removeLast();
               widget.discardStk!.add(card);
               widget.onAccept();
+              playAudioOnAccept();
             });
           }
         },

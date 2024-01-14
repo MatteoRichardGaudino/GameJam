@@ -73,8 +73,25 @@ flutter:
     - assets/fonts/Sahitya-Bold.ttf
     - assets/Main_Title_start.png
 
-    - assets/music/divinazione_game_compressed.mp3
-    - assets/music/divinazione_maintitle_compressed.mp3
+    - assets/music/divinazione_game_compressed.mp3 # ok
+    - assets/music/divinazione_maintitle_compressed.mp3 # ok
+
+    - assets/effects/exit_game.wav
+    - assets/effects/game_over_completo.wav
+    - assets/effects/options_hover.wav
+    - assets/effects/options_selection.wav
+    - assets/effects/rules.wav
+    - assets/effects/suono_accedi_pila_scarti.wav
+    - assets/effects/suono_candele_che_si_accendono.wav
+    - assets/effects/suono_evoca_Asso.wav
+    - assets/effects/suono_evoca_carta.wav
+    - assets/effects/suono_mettere_carta_nella_mano_del_demone.wav
+    - assets/effects/suono_metti_carta_in_un_posto_qualsiasi.wav
+    - assets/effects/suono_pesca_dal_mazzo_di_pesca.wav
+    - assets/effects/suono_scegli_carta_discard_pile.wav
+    - assets/effects/suono_vittoria_completo.wav
+
+
 
 
   # An image asset can refer to one or more resolution-specific "variants", see
