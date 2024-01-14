@@ -26,9 +26,6 @@ class DemonHand extends StatelessWidget {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-
-
-
         Positioned(
             top: imageHeight/40,
             left: imageWidth/10,

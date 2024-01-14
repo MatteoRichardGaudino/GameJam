@@ -246,6 +246,7 @@ class _MainGameState extends State<MainGame> with TickerProviderStateMixin{
       KPlayingCard(KSuit.eyes, KCardValue.nine),
       KPlayingCard(KSuit.eyes, KCardValue.ten),
 
+      KPlayingCard(KSuit.hearts, KCardValue.ace),
       KPlayingCard(KSuit.hearts, KCardValue.two),
       KPlayingCard(KSuit.hearts, KCardValue.three),
       KPlayingCard(KSuit.hearts, KCardValue.four),
@@ -256,6 +257,7 @@ class _MainGameState extends State<MainGame> with TickerProviderStateMixin{
       KPlayingCard(KSuit.hearts, KCardValue.nine),
       KPlayingCard(KSuit.hearts, KCardValue.ten),
 
+      KPlayingCard(KSuit.mirrors, KCardValue.ace),
       KPlayingCard(KSuit.mirrors, KCardValue.two),
       KPlayingCard(KSuit.mirrors, KCardValue.three),
       KPlayingCard(KSuit.mirrors, KCardValue.four),
@@ -266,6 +268,7 @@ class _MainGameState extends State<MainGame> with TickerProviderStateMixin{
       KPlayingCard(KSuit.mirrors, KCardValue.nine),
       KPlayingCard(KSuit.mirrors, KCardValue.ten),
 
+      KPlayingCard(KSuit.spectres, KCardValue.ace),
       KPlayingCard(KSuit.spectres, KCardValue.two),
       KPlayingCard(KSuit.spectres, KCardValue.three),
       KPlayingCard(KSuit.spectres, KCardValue.four),
@@ -324,7 +327,6 @@ class _MainGameState extends State<MainGame> with TickerProviderStateMixin{
   @override
   void initState() {
     super.initState();
-
 
     _reset();
   }
