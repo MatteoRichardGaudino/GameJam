@@ -92,6 +92,51 @@ flutter:
     - assets/effects/suono_vittoria_completo.wav
 
 
+    - assets/cards/eyes/2 of Eyes.png
+    - assets/cards/eyes/3 of Eyes.png
+    - assets/cards/eyes/4 of Eyes.png
+    - assets/cards/eyes/5 of Eyes.png
+    - assets/cards/eyes/6 of Eyes.png
+    - assets/cards/eyes/7 of Eyes.png
+    - assets/cards/eyes/Ace of Eyes.png
+    - assets/cards/eyes/King of Eyes.png
+    - assets/cards/eyes/Knight of Eyes.png
+    - assets/cards/eyes/Page of Eyes.png
+
+    - assets/cards/hearts/2 of Hearts.png
+    - assets/cards/hearts/3 of Hearts.png
+    - assets/cards/hearts/4 of Hearts.png
+    - assets/cards/hearts/5 of Hearts.png
+    - assets/cards/hearts/6 of Hearts.png
+    - assets/cards/hearts/7 of Hearts.png
+    - assets/cards/hearts/Ace of Hearts.png
+    - assets/cards/hearts/King of Hearts.png
+    - assets/cards/hearts/Knight of Hearts.png
+    - assets/cards/hearts/Page of Hearts.png
+
+    - assets/cards/mirrors/2 of Mirrors.png
+    - assets/cards/mirrors/3 of Mirrors.png
+    - assets/cards/mirrors/4 of Mirrors.png
+    - assets/cards/mirrors/5 of Mirrors.png
+    - assets/cards/mirrors/6 of Mirrors.png
+    - assets/cards/mirrors/7 of Mirrors.png
+    - assets/cards/mirrors/Ace of Mirrors.png
+    - assets/cards/mirrors/King of Mirrors.png
+    - assets/cards/mirrors/Knight of Mirrors.png
+    - assets/cards/mirrors/Page of Mirrors.png
+
+    - assets/cards/spectres/2 of Spectres.png
+    - assets/cards/spectres/3 of Spectres.png
+    - assets/cards/spectres/4 of Spectres.png
+    - assets/cards/spectres/5 of Spectres.png
+    - assets/cards/spectres/6 of Spectres.png
+    - assets/cards/spectres/7 of Spectres.png
+    - assets/cards/spectres/Ace of Spectres.png
+    - assets/cards/spectres/King of Spectres.png
+    - assets/cards/spectres/Knight of Spectres.png
+    - assets/cards/spectres/Page of Spectres.png
+
+
 
 
   # An image asset can refer to one or more resolution-specific "variants", see
