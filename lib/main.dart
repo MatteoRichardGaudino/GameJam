@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_fadein/flutter_fadein.dart';
 import 'package:game_jam/AudioManager.dart';
 import 'package:game_jam/buttons/KIconButton.dart';
+import 'package:game_jam/cards/KPlayngCard.dart';
+import 'package:game_jam/cards/KPlayngCardView.dart';
 import 'package:game_jam/dialogs/ExitConfirm.dart';
 import 'package:game_jam/dialogs/GameOverScreen.dart';
 import 'package:game_jam/dialogs/GameRulesDialog.dart';
@@ -18,7 +20,6 @@ import 'package:game_jam/buttons/kTextButton.dart';
 import 'package:game_jam/points.dart';
 import 'package:game_jam/powerSlot.dart';
 import 'package:hovering/hovering.dart';
-import 'package:playing_cards/playing_cards.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -208,15 +209,15 @@ class _MainGameState extends State<MainGame> with TickerProviderStateMixin{
   double cardWidth = 0;
   double cardHeight = 0;
 
-  final allCards = <PlayingCard>[];
-  final initialCards = <PlayingCard>[];
+  final allCards = <KPlayingCard>[];
+  final initialCards = <KPlayingCard>[];
 
-  final edgesStks = <List<PlayingCard>>[];
-  final verticesStks = <List<PlayingCard>>[];
-  final demonHand1Stk = <PlayingCard>[];
-  final demonHand2Stk = <PlayingCard>[];
+  final edgesStks = <List<KPlayingCard>>[];
+  final verticesStks = <List<KPlayingCard>>[];
+  final demonHand1Stk = <KPlayingCard>[];
+  final demonHand2Stk = <KPlayingCard>[];
 
-  final discardStk = <PlayingCard>[];
+  final discardStk = <KPlayingCard>[];
 
   bool canSummon = true;
 
@@ -233,49 +234,49 @@ class _MainGameState extends State<MainGame> with TickerProviderStateMixin{
     canSummon = true;
     gamePoints.reset();
 
-    allCards.addAll([PlayingCard(Suit.spades, CardValue.ace),
-      PlayingCard(Suit.spades, CardValue.two),
-      PlayingCard(Suit.spades, CardValue.three),
-      PlayingCard(Suit.spades, CardValue.four),
-      PlayingCard(Suit.spades, CardValue.five),
-      PlayingCard(Suit.spades, CardValue.six),
-      PlayingCard(Suit.spades, CardValue.seven),
-      PlayingCard(Suit.spades, CardValue.eight),
-      PlayingCard(Suit.spades, CardValue.nine),
-      PlayingCard(Suit.spades, CardValue.ten),
+    allCards.addAll([
+      KPlayingCard(KSuit.eyes, KCardValue.ace),
+      KPlayingCard(KSuit.eyes, KCardValue.two),
+      KPlayingCard(KSuit.eyes, KCardValue.three),
+      KPlayingCard(KSuit.eyes, KCardValue.four),
+      KPlayingCard(KSuit.eyes, KCardValue.five),
+      KPlayingCard(KSuit.eyes, KCardValue.six),
+      KPlayingCard(KSuit.eyes, KCardValue.seven),
+      KPlayingCard(KSuit.eyes, KCardValue.eight),
+      KPlayingCard(KSuit.eyes, KCardValue.nine),
+      KPlayingCard(KSuit.eyes, KCardValue.ten),
 
-      PlayingCard(Suit.hearts, CardValue.ace),
-      PlayingCard(Suit.hearts, CardValue.two),
-      PlayingCard(Suit.hearts, CardValue.three),
-      PlayingCard(Suit.hearts, CardValue.four),
-      PlayingCard(Suit.hearts, CardValue.five),
-      PlayingCard(Suit.hearts, CardValue.six),
-      PlayingCard(Suit.hearts, CardValue.seven),
-      PlayingCard(Suit.hearts, CardValue.eight),
-      PlayingCard(Suit.hearts, CardValue.nine),
-      PlayingCard(Suit.hearts, CardValue.ten),
+      KPlayingCard(KSuit.hearts, KCardValue.two),
+      KPlayingCard(KSuit.hearts, KCardValue.three),
+      KPlayingCard(KSuit.hearts, KCardValue.four),
+      KPlayingCard(KSuit.hearts, KCardValue.five),
+      KPlayingCard(KSuit.hearts, KCardValue.six),
+      KPlayingCard(KSuit.hearts, KCardValue.seven),
+      KPlayingCard(KSuit.hearts, KCardValue.eight),
+      KPlayingCard(KSuit.hearts, KCardValue.nine),
+      KPlayingCard(KSuit.hearts, KCardValue.ten),
 
-      PlayingCard(Suit.clubs, CardValue.ace),
-      PlayingCard(Suit.clubs, CardValue.two),
-      PlayingCard(Suit.clubs, CardValue.three),
-      PlayingCard(Suit.clubs, CardValue.four),
-      PlayingCard(Suit.clubs, CardValue.five),
-      PlayingCard(Suit.clubs, CardValue.six),
-      PlayingCard(Suit.clubs, CardValue.seven),
-      PlayingCard(Suit.clubs, CardValue.eight),
-      PlayingCard(Suit.clubs, CardValue.nine),
-      PlayingCard(Suit.clubs, CardValue.ten),
+      KPlayingCard(KSuit.mirrors, KCardValue.two),
+      KPlayingCard(KSuit.mirrors, KCardValue.three),
+      KPlayingCard(KSuit.mirrors, KCardValue.four),
+      KPlayingCard(KSuit.mirrors, KCardValue.five),
+      KPlayingCard(KSuit.mirrors, KCardValue.six),
+      KPlayingCard(KSuit.mirrors, KCardValue.seven),
+      KPlayingCard(KSuit.mirrors, KCardValue.eight),
+      KPlayingCard(KSuit.mirrors, KCardValue.nine),
+      KPlayingCard(KSuit.mirrors, KCardValue.ten),
 
-      PlayingCard(Suit.diamonds, CardValue.ace),
-      PlayingCard(Suit.diamonds, CardValue.two),
-      PlayingCard(Suit.diamonds, CardValue.three),
-      PlayingCard(Suit.diamonds, CardValue.four),
-      PlayingCard(Suit.diamonds, CardValue.five),
-      PlayingCard(Suit.diamonds, CardValue.six),
-      PlayingCard(Suit.diamonds, CardValue.seven),
-      PlayingCard(Suit.diamonds, CardValue.eight),
-      PlayingCard(Suit.diamonds, CardValue.nine),
-      PlayingCard(Suit.diamonds, CardValue.ten),]);
+      KPlayingCard(KSuit.spectres, KCardValue.two),
+      KPlayingCard(KSuit.spectres, KCardValue.three),
+      KPlayingCard(KSuit.spectres, KCardValue.four),
+      KPlayingCard(KSuit.spectres, KCardValue.five),
+      KPlayingCard(KSuit.spectres, KCardValue.six),
+      KPlayingCard(KSuit.spectres, KCardValue.seven),
+      KPlayingCard(KSuit.spectres, KCardValue.eight),
+      KPlayingCard(KSuit.spectres, KCardValue.nine),
+      KPlayingCard(KSuit.spectres, KCardValue.ten),
+
+    ]);
     verticesStks.addAll([
       [],
       [],
@@ -287,9 +288,9 @@ class _MainGameState extends State<MainGame> with TickerProviderStateMixin{
 
     // if one of the first 4 cards is an ace replace it with the first non-ace card
     for(int i = 0; i < 5; i++){
-      if(allCards[i].value == CardValue.ace){
+      if(allCards[i].value == KCardValue.ace){
         for(int j = 5; j < allCards.length; j++){
-          if(allCards[j].value != CardValue.ace){
+          if(allCards[j].value != KCardValue.ace){
             final temp = allCards[i];
             allCards[i] = allCards[j];
             allCards[j] = temp;
@@ -312,9 +313,9 @@ class _MainGameState extends State<MainGame> with TickerProviderStateMixin{
       [initialCards[2]],
       [initialCards[3]],
       [initialCards[4]],
-      // [PlayingCard(Suit.clubs, CardValue.four)],
-      // [PlayingCard(Suit.clubs, CardValue.two)],
-      // [PlayingCard(Suit.clubs, CardValue.three)],
+      // [KPlayingCard(Suit.clubs, KCardValue.four)],
+      // [KPlayingCard(Suit.clubs, KCardValue.two)],
+      // [KPlayingCard(Suit.clubs, KCardValue.three)],
       // [],
       // [],
     ]);
@@ -332,7 +333,7 @@ class _MainGameState extends State<MainGame> with TickerProviderStateMixin{
 
   GameState _winCheck(){
     // if all the vertex has a 10 return won
-    if(verticesStks.every((element) => element.isNotEmpty && element.last.value == CardValue.ten)){
+    if(verticesStks.every((element) => element.isNotEmpty && element.last.value == KCardValue.ten)){
       return GameState.won;
     }
     // if the deck is not empty return playing
@@ -345,25 +346,25 @@ class _MainGameState extends State<MainGame> with TickerProviderStateMixin{
     if(discardStk.isNotEmpty){
       final card = discardStk.last;
       if(edgesStks.any((element) => element.isEmpty || descRule(element.last, card))) return GameState.playing;
-      if(verticesStks.any((element) => (element.isEmpty && card.value == CardValue.ace) || (element.isNotEmpty && crescentRule(element.last, card)))) return GameState.playing;
+      if(verticesStks.any((element) => (element.isEmpty && card.value == KCardValue.ace) || (element.isNotEmpty && crescentRule(element.last, card)))) return GameState.playing;
     }
     // same thing for demon hand
     if(demonHand1Stk.isNotEmpty){
       final card = demonHand1Stk.last;
       if(edgesStks.any((element) => element.isEmpty || descRule(element.last, card))) return GameState.playing;
-      if(verticesStks.any((element) => (element.isEmpty && card.value == CardValue.ace) || (element.isNotEmpty && crescentRule(element.last, card)))) return GameState.playing;
+      if(verticesStks.any((element) => (element.isEmpty && card.value == KCardValue.ace) || (element.isNotEmpty && crescentRule(element.last, card)))) return GameState.playing;
     }
     if(demonHand2Stk.isNotEmpty){
       final card = demonHand2Stk.last;
       if(edgesStks.any((element) => element.isEmpty || descRule(element.last, card))) return GameState.playing;
-      if(verticesStks.any((element) => (element.isEmpty && card.value == CardValue.ace) || (element.isNotEmpty && crescentRule(element.last, card)))) return GameState.playing;
+      if(verticesStks.any((element) => (element.isEmpty && card.value == KCardValue.ace) || (element.isNotEmpty && crescentRule(element.last, card)))) return GameState.playing;
     }
     // if can move a card from the edges to the vertices return playing
     for(int i = 0; i < edgesStks.length; i++){
       final stk = edgesStks[i];
       if(stk.isNotEmpty) {
         final card = edgesStks[i].last;
-        if(verticesStks.any((element) => (element.isEmpty && card.value == CardValue.ace) || (element.isNotEmpty && crescentRule(element.last, card)))) return GameState.playing;
+        if(verticesStks.any((element) => (element.isEmpty && card.value == KCardValue.ace) || (element.isNotEmpty && crescentRule(element.last, card)))) return GameState.playing;
       }
     }
     // if can move a card from the edges to the edges return playing
@@ -580,7 +581,7 @@ class _MainGameState extends State<MainGame> with TickerProviderStateMixin{
               accentIndex: 10,
               onPressed: (){
                 if(!gamePoints.can(2)) return;
-                final index = allCards.indexWhere((element) => element.value == CardValue.ace);
+                final index = allCards.indexWhere((element) => element.value == KCardValue.ace);
                 if(index == -1) return;
                 final card = allCards.removeAt(index);
                 print("Summoning an ace. index = $index, points = ${gamePoints.points}");
@@ -602,7 +603,7 @@ class _MainGameState extends State<MainGame> with TickerProviderStateMixin{
     );
   }
 
-  List _dialogCardRow(List<PlayingCard> row, {bool summon = false}){
+  List _dialogCardRow(List<KPlayingCard> row, {bool summon = false}){
 
     double screenH = MediaQuery.of(context).size.height;
     double cardHeight = screenH/4;
@@ -632,7 +633,7 @@ class _MainGameState extends State<MainGame> with TickerProviderStateMixin{
           child: SizedBox(
             width: cardWidth,
             height: cardHeight,
-            child: PlayingCardView(card: e),
+            child: KPlayingCardView(e, cardWidth, cardHeight),
           ),
         );
 
@@ -788,17 +789,20 @@ class _MainGameState extends State<MainGame> with TickerProviderStateMixin{
   @override
   Widget build(BuildContext context) {
 
+    // cardHeight/cardwidth =  175/100
+
+
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
     cardHeight = screenHeight/3;
-    cardWidth = cardHeight * 2/3;
+    cardWidth = cardHeight * 100/175;
     final totalWidth = cardWidth * 8;
 
 
     if(screenWidth < totalWidth) {
       cardWidth = screenWidth/8;
-      cardHeight = cardWidth * 3/2;
+      cardHeight = cardWidth * 175/100;
     }
 
 
@@ -849,6 +853,6 @@ class _MainGameState extends State<MainGame> with TickerProviderStateMixin{
   }
 
   bool _allCardsHasAce() {
-    return allCards.any((element) => element.value == CardValue.ace);
+    return allCards.any((element) => element.value == KCardValue.ace);
   }
 }

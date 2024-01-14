@@ -1,7 +1,3 @@
-
-
-import 'package:playing_cards/playing_cards.dart';
-
 enum KSuit { eyes, hearts, mirrors, spectres }
 enum KCardValue {
   two,
@@ -19,9 +15,9 @@ enum KCardValue {
 
 class KPlayingCard {
   KSuit suit;
-  KCardValue cardValue;
+  KCardValue value;
 
-  KPlayingCard(this.suit, this.cardValue);
+  KPlayingCard(this.suit, this.value);
 }
 
 
@@ -69,5 +65,5 @@ String valueToString(KCardValue value){
 }
 
 String kCardToAsset(KPlayingCard card){
-  return "assets/cards/" + suitToString(card.suit) + "/" + valueToString(card.cardValue) + " of " + suitToStringUp(card.suit) + ".png";
+  return "assets/cards/" + suitToString(card.suit) + "/" + valueToString(card.value) + " of " + suitToStringUp(card.suit) + ".png";
 }

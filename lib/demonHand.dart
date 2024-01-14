@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:game_jam/cardStack.dart';
-import 'package:playing_cards/playing_cards.dart';
+import 'package:game_jam/cards/KPlayngCard.dart';
 
 class DemonHand extends StatelessWidget {
   DemonHand(this.width, {super.key, required this.cardWidth, required this.cardHeight, required this.stk1, required this.stk2, required this.onAccept});
@@ -9,8 +9,8 @@ class DemonHand extends StatelessWidget {
   final double cardWidth;
   final double cardHeight;
 
-  final List<PlayingCard> stk1;
-  final List<PlayingCard> stk2;
+  final List<KPlayingCard> stk1;
+  final List<KPlayingCard> stk2;
 
   dynamic Function() onAccept;
 
@@ -30,7 +30,7 @@ class DemonHand extends StatelessWidget {
 
 
         Positioned(
-            top: imageHeight/30,
+            top: imageHeight/40,
             left: imageWidth/10,
             child: Transform.rotate(
                 angle: -0.3,
@@ -38,8 +38,8 @@ class DemonHand extends StatelessWidget {
         ),
 
         Positioned(
-            top: 0,
-            right: 0,
+            top: -imageHeight/30,
+            right: 0 + imageWidth/10,
             child: Transform.rotate(
                 angle: 0.4,
                 child: GestureDetector(
@@ -50,7 +50,7 @@ class DemonHand extends StatelessWidget {
         IgnorePointer(
           ignoring: true,
           child: Transform.translate(
-            offset: Offset(-imageWidth/8, imageHeight/6),
+            offset: Offset(-imageWidth/8 - imageWidth/10, imageHeight/6),
             child: Image.asset("assets/mano-demone.png",
               width: imageWidth,
               height: imageHeight,

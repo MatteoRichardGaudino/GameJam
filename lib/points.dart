@@ -1,17 +1,17 @@
 import 'package:game_jam/AudioManager.dart';
-import 'package:playing_cards/playing_cards.dart';
+import 'package:game_jam/cards/KPlayngCard.dart';
 
 class Points{
   int points = 0;
 
-  final List<(PlayingCard, PlayingCard)> _pairs = [];
+  final List<(KPlayingCard, KPlayingCard)> _pairs = [];
 
 
-  void addPair(PlayingCard a, PlayingCard b){
+  void addPair(KPlayingCard a, KPlayingCard b){
     _pairs.add((a, b));
   }
 
-  bool hasPair(PlayingCard a, PlayingCard b){
+  bool hasPair(KPlayingCard a, KPlayingCard b){
     for(final i in _pairs){
       if(i.$1 == a && i.$2 == b) return true;
     }
@@ -39,7 +39,7 @@ class Points{
   }
 
   void reset(){
-    points = 0; // TODO
+    points = 0;
     _pairs.clear();
     onChange = (){};
   }

@@ -1,8 +1,9 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:game_jam/AudioManager.dart';
+import 'package:game_jam/cards/KPlayngCard.dart';
+import 'package:game_jam/cards/KPlayngCardView.dart';
 import 'package:game_jam/points.dart';
-import 'package:playing_cards/playing_cards.dart';
 
 enum CardStackType {
   vertex,
@@ -16,14 +17,14 @@ class CardStack extends StatefulWidget {
   CardStack({super.key, required this.cardWidth, required this.cardHeight, required this.stk, required this.type, this.discardStk, this.fatherSetState, required this.onAccept});
   double cardWidth;
   double cardHeight;
-  List<PlayingCard> stk;
-  List<PlayingCard>? discardStk;
+  List<KPlayingCard> stk;
+  List<KPlayingCard>? discardStk;
   CardStackType type;
   void Function(void Function())? fatherSetState;
 
   dynamic Function() onAccept;
 
-  PlayingCard top(){
+  KPlayingCard top(){
     return stk[stk.length - 1];
   }
 
@@ -47,14 +48,14 @@ class _CardStackState extends State<CardStack> {
 
     else if(widget.type == CardStackType.vertex){
       if(widget.stk.isEmpty){
-        return other.top().value == CardValue.ace; // empty vertex can only accept aces
+        return other.top().value == KCardValue.ace; // empty vertex can only accept aces
       } else {
         return crescentRule(widget.top(), other.top());
       }
     }
 
     else if(widget.type == CardStackType.edge){
-      if(other.top().value == CardValue.ace) return false; // edge can't accept aces
+      if(other.top().value == KCardValue.ace) return false; // edge can't accept aces
       if(widget.stk.isEmpty){
         return true; // empty edge can accept anything but other edges
       } else {
@@ -63,7 +64,7 @@ class _CardStackState extends State<CardStack> {
     }
 
     else if(widget.type == CardStackType.demonHand){
-      if(other.top().value == CardValue.ace) return false; // demon hand can't accept aces
+      if(other.top().value == KCardValue.ace) return false; // demon hand can't accept aces
       return gamePoints.can(1) && widget.stk.isEmpty;
     }
 
@@ -183,21 +184,15 @@ class _CardStackState extends State<CardStack> {
     }
   }
 
-  Widget cardContainer(PlayingCard card, {bool forceShow = false}){
+  Widget cardContainer(KPlayingCard card, {bool forceShow = false}){
     return Container(
       width: widget.cardWidth,
       height: widget.cardHeight,
-      child: PlayingCardView(
-          card: card,
+      child: KPlayingCardView(
+          card,
+          widget.cardWidth,
+          widget.cardHeight,
           showBack: !forceShow && widget.type == CardStackType.deck,
-          style: PlayingCardViewStyle(
-            cardBackContentBuilder: (context){
-              return Image.asset(
-                  "assets/carta-retro.png",
-                  fit: BoxFit.fill,
-              );
-            },
-          )
       ),
     );
   }
@@ -213,22 +208,22 @@ class _CardStackState extends State<CardStack> {
 }
 
 
-bool crescentRule(PlayingCard top, PlayingCard newCard){
+bool crescentRule(KPlayingCard top, KPlayingCard newCard){
   if(newCard.suit != top.suit) return false;
   int topV = top.value.index;
   int newCardV = newCard.value.index;
-  if(top.value == CardValue.ace) topV = -1;
-  if(newCard.value == CardValue.ace) newCardV = -1;
+  if(top.value == KCardValue.ace) topV = -1;
+  if(newCard.value == KCardValue.ace) newCardV = -1;
 
   return newCardV == topV + 1;
 }
 
-bool descRule(PlayingCard top, PlayingCard newCard){
+bool descRule(KPlayingCard top, KPlayingCard newCard){
   if(newCard.suit != top.suit) return false;
   int topV = top.value.index;
   int newCardV = newCard.value.index;
-  if(top.value == CardValue.ace) topV = -1;
-  if(newCard.value == CardValue.ace) newCardV = -1;
+  if(top.value == KCardValue.ace) topV = -1;
+  if(newCard.value == KCardValue.ace) newCardV = -1;
 
   return newCardV + 1 == topV;
 }
